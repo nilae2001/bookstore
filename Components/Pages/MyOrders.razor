@@ -1,0 +1,64 @@
+@page "/myorders"
+@implements IAsyncDisposable
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<BookstoreDb> DbFactory
+@rendermode InteractiveServer
+
+<PageTitle>Bookstore - My Orders</PageTitle>
+
+<div class="container mt-5">
+    @if (orders is null) {
+        <p>Loading...</p>
+    } else if (!orders.Any()) {
+        <p>No orders placed yet.</p>
+    } else {
+        @foreach (var order in orders) {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>@order.OrderDate.ToString("MMMM dd, yyyy")</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in order.OrderItems) {
+                        <div class="row mb-2">
+                            <div class="col-8">
+                                <strong>@item.Book.Title</strong> <span class="badge bg-secondary">@item.Quantity</span>
+                            </div>
+                            <div class="col-4 text-end">
+                                $@item.GetTotal().ToString("F2")
+                            </div>
+                        </div>
+                    }
+                    <hr />
+                    <div class="row">
+                        <div class="col-8">
+                            <strong>Total @(order.OrderItems.Count > 1 ? $"({order.OrderItems.Count})" : "(1)"):</strong>
+                        </div>
+                        <div class="col-4 text-end">
+                            <strong>$@order.GetTotal().ToString("F2")</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private BookstoreDb context { get; set; }
+
+    private List<Order> orders;
+
+    protected override async Task OnInitializedAsync() {
+        context = DbFactory.CreateDbContext();
+        
+        // Load all orders with their related book information, ordered by date descending
+        orders = await context.Orders
+            .AsNoTracking()
+            .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Book)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

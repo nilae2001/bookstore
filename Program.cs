@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Bookstore.Data;
 using Bookstore.Components;
 using Bookstore.Models;
+using Bookstore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,9 @@ builder.Services.AddDbContextFactory<BookstoreDb>(options => options.UseSqlServe
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+builder.Services.AddScoped<OrderState>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
