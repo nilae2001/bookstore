@@ -27,7 +27,9 @@
                         <dt class="col-sm-4">Author</dt>
                         <dd class="col-sm-8">@book.Author</dd>
                         <dt class="col-sm-4">Genre</dt>
-                        <dd class="col-sm-8">@book.Genre</dd>
+                        <dd class="col-sm-8">
+                            <a href="@($"/genre/{Uri.EscapeDataString(book.Genre)}")">@book.Genre</a>
+                        </dd>
                         <dt class="col-sm-4">Publisher</dt>
                         <dd class="col-sm-8">@book.Publisher</dd>
                         <dt class="col-sm-4">PublicationYear</dt>
@@ -53,7 +55,7 @@
 </div>
 
 @code {
-    private Book? book;
+    private Book book = null!;
 
     [SupplyParameterFromQuery]
     private int Id { get; set; }
